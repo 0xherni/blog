@@ -1,7 +1,7 @@
 Title: Markdown Playground (Demo)
 Slug: markdown-playground
 Parent: Blog
-Order: 1
+Order: 10
 Description: A demo post showcasing the exact writing system used by this template.
 MetaPropertyTitle: Markdown Playground (Demo)
 MetaDescription: Headings, lists, images, code blocks, quotes, and custom callout boxes (HTML + CSS).

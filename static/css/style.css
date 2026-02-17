@@ -441,3 +441,13 @@ img.wide-img{
     max-width: 100%;
   }
 }
+
+/* Sidebar category headers: prevent any list/disclosure marker like ">" */
+.sidebar h2{
+  display: block !important;     /* overrides any display:list-item */
+  list-style: none !important;
+}
+
+.sidebar h2::marker{
+  content: "" !important;
+}
