@@ -1,6 +1,7 @@
 Title: Home page!
-Parent: Intro
+Parent: Hidden
 Order: 1
+Hide: true
 MetaPropertyTitle: My new home page!
 MetaDescription: Hello there this is my home page.
 MetaOgURL: https://www.example.com/
