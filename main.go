@@ -354,14 +354,18 @@ func loadSidebarData(dir string) (SidebarData, error) {
 			continue
 		}
 
-		if _, exists := categoriesMap[post.Parent]; !exists {
+		// ✅ FIX: category order = MIN(Order) among its pages
+		if cat, exists := categoriesMap[post.Parent]; !exists {
 			categoriesMap[post.Parent] = &Category{
 				Name:  post.Parent,
 				Pages: []BlogPost{post},
 				Order: post.Order,
 			}
 		} else {
-			categoriesMap[post.Parent].Pages = append(categoriesMap[post.Parent].Pages, post)
+			cat.Pages = append(cat.Pages, post)
+			if post.Order < cat.Order {
+				cat.Order = post.Order
+			}
 		}
 	}
 
@@ -374,8 +378,11 @@ func loadSidebarData(dir string) (SidebarData, error) {
 		sidebar.Categories = append(sidebar.Categories, *cat)
 	}
 
-	// sort categories by Order
+	// sort categories by Order (+ tie-breaker by Name)
 	sort.Slice(sidebar.Categories, func(i, j int) bool {
+		if sidebar.Categories[i].Order == sidebar.Categories[j].Order {
+			return strings.ToLower(sidebar.Categories[i].Name) < strings.ToLower(sidebar.Categories[j].Name)
+		}
 		return sidebar.Categories[i].Order < sidebar.Categories[j].Order
 	})
 
