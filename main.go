@@ -181,8 +181,15 @@ func loadMarkdownPosts(dir string) ([]BlogPost, error) {
 	}
 
 	for _, file := range files {
-		if strings.HasSuffix(file.Name(), ".md") {
-			path := dir + "/" + file.Name()
+		name := file.Name()
+
+		// ✅ Don't treat the home page as a "post"
+		if name == "index.md" {
+			continue
+		}
+
+		if strings.HasSuffix(name, ".md") {
+			path := dir + "/" + name
 			content, err := os.ReadFile(path)
 			if err != nil {
 				return nil, err
