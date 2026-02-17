@@ -88,38 +88,67 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// ✅ HOME: serve About page (about.md) at "/"
+	// --- ✅ Load about.md once, compute its slug, and serve it at /<aboutSlug> ---
+	aboutSlug := "about" // fallback default
+	aboutPath := "./markdown/about.md"
+
+	var aboutPost BlogPost
+	var aboutOK bool
+
+	if aboutContent, err := os.ReadFile(aboutPath); err == nil {
+		if p, err := parseMarkdownFile(aboutContent); err == nil {
+			aboutPost = p
+			aboutOK = true
+
+			if s := strings.TrimSpace(p.Slug); s != "" {
+				aboutSlug = s
+			}
+		} else {
+			log.Printf("Failed to parse about.md (will fallback to index.md): %v\n", err)
+		}
+	} else {
+		log.Printf("about.md not found (will fallback to index.md): %v\n", err)
+	}
+
+	// ✅ ROOT: redirect to /<aboutSlug> (changes browser URL)
 	r.GET("/", func(c *gin.Context) {
-		// Prefer about.md; fallback to index.md if missing.
-		path := "./markdown/about.md"
-		content, err := os.ReadFile(path)
-		if err != nil {
-			log.Printf("about.md not found, falling back to index.md: %v\n", err)
-			path = "./markdown/index.md"
-			content, err = os.ReadFile(path)
+		c.Redirect(http.StatusMovedPermanently, "/"+aboutSlug) // 301
+	})
+
+	// ✅ About route: actually serves about.md at /<aboutSlug>
+	r.GET("/"+aboutSlug, func(c *gin.Context) {
+		var post BlogPost
+		var err error
+
+		if aboutOK {
+			post = aboutPost
+		} else {
+			// fallback: index.md
+			content, readErr := os.ReadFile("./markdown/index.md")
+			if readErr != nil {
+				log.Printf("Error reading index.md fallback: %v\n", readErr)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+				return
+			}
+			post, err = parseMarkdownFile(content)
 			if err != nil {
-				log.Printf("Error occurred during operation: %v\n", err)
+				log.Printf("Error parsing index.md fallback: %v\n", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 				return
 			}
 		}
 
-		post, err := parseMarkdownFile(content)
-		if err != nil {
-			log.Printf("Error occurred during operation: %v\n", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
-			return
-		}
-
 		sidebarLinks := createSidebarLinks(post.Headers)
 
-		c.HTML(http.StatusOK, "index.html", gin.H{
+		// Usamos layout.html para consistencia con el resto de páginas
+		c.HTML(http.StatusOK, "layout.html", gin.H{
 			"Title":                   post.Title,
 			"Content":                 post.Content,
 			"SidebarData":             sidebarData,
 			"Headers":                 post.Headers,
+			"Description":             post.Description,
 			"SidebarLinks":            sidebarLinks,
-			"CurrentSlug":             post.Slug, // should be "about" if about.md has Slug: about
+			"CurrentSlug":             post.Slug,
 			"MetaDescription":         post.MetaDescription,
 			"MetaPropertyTitle":       post.MetaPropertyTitle,
 			"MetaPropertyDescription": post.MetaPropertyDescription,
