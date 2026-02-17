@@ -1,4 +1,35 @@
+package main
 
+/**
+To use this, make a new markdown file. For convention name the file the same as the slug. The md file should be in /markdown
+
+To see more detailed instructions, see my blog at  https://fluxsec.red, or reach out to me
+on twitter https://twitter.com/0xfluxsec.
+
+The .md file must then have the following attributes, including the 3 lines ---
+those lines separate the tags from the content:
+
+Title: Page title, and title in left sidebar
+Slug: slug-of-url
+Parent: The name you wish the parent series to be called
+Order: number in terms of parent order
+Description: Small strap-line description which appears under the title
+MetaPropertyTitle: Title for social sharing
+MetaDescription: Description ~ 150 - 200 words of the page for SEO.
+MetaPropertyDescription: SHORT description for social media sharing.
+MetaOgURL: https://www.fluxsec.red/slug-of-url
+---
+Content goes here
+
+Additional downloads:
+* FontAwesome free, into /static/
+
+*/
+
+import (
+	"errors"
+	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
